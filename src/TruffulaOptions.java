@@ -99,12 +99,45 @@ public class TruffulaOptions  {
    * @param args command-line arguments in the format [-h] [-nc] path
    * @throws IllegalArgumentException if unknown arguments are provided or the path is missing
    * @throws FileNotFoundException if the directory cannot be found or if the path points to a file
-   */
+  */
   public TruffulaOptions(String[] args) throws IllegalArgumentException, FileNotFoundException {
-    // TODO: Replace the below lines with your implementation
-    root = null;
-    showHidden = false;
-    useColor = false;
+    boolean parsedShowHidden = false;
+    boolean parsedUseColor = true;
+    File parsedRoot = null;
+
+    if (args == null || args.length == 0) {
+      throw new IllegalArgumentException("Path argument is required.");
+    }
+
+    for (String arg : args) {
+      if ("-h".equals(arg)) {
+        parsedShowHidden = true;
+      } else if ("-nc".equals(arg)) {
+        parsedUseColor = false;
+      } else if (arg.startsWith("-")) {
+        throw new IllegalArgumentException("Unknown flag: " + arg);
+      } else if (parsedRoot == null) {
+        parsedRoot = new File(arg);
+      } else {
+        throw new IllegalArgumentException("Only one path argument is allowed.");
+      }
+    }
+
+    if (parsedRoot == null) {
+      throw new IllegalArgumentException("Path argument is required.");
+    }
+
+    if (!parsedRoot.exists()) {
+      throw new FileNotFoundException("Directory not found: " + parsedRoot.getPath());
+    }
+
+    if (!parsedRoot.isDirectory()) {
+      throw new FileNotFoundException("Path is not a directory: " + parsedRoot.getPath());
+    }
+
+    this.root = parsedRoot;
+    this.showHidden = parsedShowHidden;
+    this.useColor = parsedUseColor;
   }
 
   /**
