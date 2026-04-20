@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.PrintStream;
 import java.util.List;
 
@@ -103,16 +104,32 @@ public class TruffulaPrinter {
    *    zebra.txt
    */
   public void printTree() {
-    // TODO: Implement this!
-    // REQUIRED: ONLY use java.io, DO NOT use java.nio
-    
-    // Hints:
-    // - Add a recursive helper method
-    // - For Wave 6: Use AlphabeticalFileSorter
-    // DO NOT USE SYSTEM.OUT.PRINTLN
-    // USE out.println instead (will use your ColorPrinter)
+    File root = options.getRoot();
+    printNode(root, 0);
+  }
 
-    out.println("printTree was called!");
-    out.println("My options are: " + options);
+  private void printNode(File file, int depth) {
+    StringBuilder line = new StringBuilder();
+    for (int i = 0; i < depth * 3; i++) {
+      line.append(" ");
+    }
+    line.append(file.getName());
+    if (file.isDirectory()) {
+      line.append("/");
+    }
+    out.println(line.toString());
+
+    if (!file.isDirectory()) {
+      return;
+    }
+
+    File[] children = file.listFiles();
+    if (children == null) {
+      return;
+    }
+
+    for (File child : children) {
+      printNode(child, depth + 1);
+    }
   }
 }
