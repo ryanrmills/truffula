@@ -15,6 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TruffulaPrinterTest {
 
+    private static String withoutAnsiCodes(String text) {
+        return text.replaceAll("\033\\[[;\\d]*m", "");
+    }
+
     /**
      * Checks if the current operating system is Windows.
      *
@@ -58,6 +62,32 @@ public class TruffulaPrinterTest {
             Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
         }
         return hidden;
+    }
+
+    @Test
+    public void testPrintTree_BasicDirectoryTree(@TempDir File tempDir) throws IOException {
+        File myFolder = new File(tempDir, "myFolder");
+        assertTrue(myFolder.mkdir(), "myFolder should be created");
+
+        File documents = new File(myFolder, "Documents");
+        assertTrue(documents.mkdir(), "Documents directory should be created");
+
+        File notes = new File(documents, "notes.txt");
+        assertTrue(notes.createNewFile(), "notes.txt should be created");
+
+        TruffulaOptions options = new TruffulaOptions(myFolder, false, true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(baos);
+        TruffulaPrinter printer = new TruffulaPrinter(options, printStream);
+
+        printer.printTree();
+
+        String nl = System.lineSeparator();
+        String expected = "myFolder/" + nl
+                + "   Documents/" + nl
+                + "      notes.txt" + nl;
+
+        assertEquals(expected, withoutAnsiCodes(baos.toString()));
     }
 
     @Test
