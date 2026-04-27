@@ -60,7 +60,7 @@ public enum ConsoleColor {
   WHITE("\033[0;37m"),
 
   /**
-   * Resets the text color to the terminal's default color (ANSI code: \033[0m).
+   * Resets the text color to the terminal"s default color (ANSI code: \033[0m).
    */
   RESET("\033[0m");
 
