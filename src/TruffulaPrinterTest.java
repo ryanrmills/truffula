@@ -139,6 +139,31 @@ public class TruffulaPrinterTest {
     }
 
     @Test
+    public void testPrintTree_SortsFilesAlphabetically(@TempDir File tempDir) throws IOException {
+        File myFolder = new File(tempDir, "myFolder");
+        assertTrue(myFolder.mkdir(), "myFolder should be created");
+
+        File zebra = new File(myFolder, "zebra.txt");
+        File apple = new File(myFolder, "Apple.txt");
+        assertTrue(zebra.createNewFile(), "zebra.txt should be created");
+        assertTrue(apple.createNewFile(), "Apple.txt should be created");
+
+        TruffulaOptions options = new TruffulaOptions(myFolder, false, true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(baos);
+        TruffulaPrinter printer = new TruffulaPrinter(options, printStream);
+
+        printer.printTree();
+
+        String nl = System.lineSeparator();
+        String expected = "myFolder/" + nl
+                + "   Apple.txt" + nl
+                + "   zebra.txt" + nl;
+
+        assertEquals(expected, withoutAnsiCodes(baos.toString()));
+    }
+
+    @Test
     public void testPrintTree_ExactOutput_WithCustomPrintStream(@TempDir File tempDir) throws IOException {
         // Build the example directory structure:
         // myFolder/
