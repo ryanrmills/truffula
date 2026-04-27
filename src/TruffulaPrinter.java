@@ -117,6 +117,11 @@ public class TruffulaPrinter {
     if (file.isDirectory()) {
       line.append("/");
     }
+    if (options.isUseColor()) {
+      out.setCurrentColor(colorSequence.get(depth % colorSequence.size()));
+    } else {
+      out.setCurrentColor(ConsoleColor.WHITE);
+    }
     out.println(line.toString());
 
     if (!file.isDirectory()) {
@@ -129,6 +134,9 @@ public class TruffulaPrinter {
     }
 
     for (File child : children) {
+      if (!options.isShowHidden() && child.isHidden()) {
+        continue;
+      }
       printNode(child, depth + 1);
     }
   }

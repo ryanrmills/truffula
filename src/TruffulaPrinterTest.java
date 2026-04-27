@@ -91,6 +91,54 @@ public class TruffulaPrinterTest {
     }
 
     @Test
+    public void testPrintTree_DoesNotShowHiddenFilesByDefault(@TempDir File tempDir) throws IOException {
+        File myFolder = new File(tempDir, "myFolder");
+        assertTrue(myFolder.mkdir(), "myFolder should be created");
+
+        File visible = new File(myFolder, "visible.txt");
+        assertTrue(visible.createNewFile(), "visible.txt should be created");
+        createHiddenFile(myFolder, ".hidden.txt");
+
+        TruffulaOptions options = new TruffulaOptions(myFolder, false, true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(baos);
+        TruffulaPrinter printer = new TruffulaPrinter(options, printStream);
+
+        printer.printTree();
+
+        String output = withoutAnsiCodes(baos.toString());
+
+        assertTrue(output.contains("visible.txt"));
+        assertTrue(!output.contains(".hidden.txt"));
+    }
+
+    @Test
+    public void testPrintTree_UsesColorsByDepth(@TempDir File tempDir) throws IOException {
+        File myFolder = new File(tempDir, "myFolder");
+        assertTrue(myFolder.mkdir(), "myFolder should be created");
+
+        File documents = new File(myFolder, "Documents");
+        assertTrue(documents.mkdir(), "Documents directory should be created");
+
+        File notes = new File(documents, "notes.txt");
+        assertTrue(notes.createNewFile(), "notes.txt should be created");
+
+        TruffulaOptions options = new TruffulaOptions(myFolder, false, true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(baos);
+        TruffulaPrinter printer = new TruffulaPrinter(options, printStream);
+
+        printer.printTree();
+
+        String nl = System.lineSeparator();
+        String expected = ConsoleColor.WHITE + "myFolder/" + nl + ConsoleColor.RESET
+                + ConsoleColor.PURPLE + "   Documents/" + nl + ConsoleColor.RESET
+                + ConsoleColor.YELLOW + "      notes.txt" + nl + ConsoleColor.RESET;
+
+        assertEquals(expected, baos.toString());
+    }
+
+    @Test
     public void testPrintTree_ExactOutput_WithCustomPrintStream(@TempDir File tempDir) throws IOException {
         // Build the example directory structure:
         // myFolder/
